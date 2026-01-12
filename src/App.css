@@ -1,1 +1,28 @@
 @import "tailwindcss";
+
+#root {
+  @apply contents;
+}
+
+button,
+input,
+select,
+textarea {
+  @apply cursor-pointer not-disabled:outline-orange-400 transition-all duration-75;
+
+  &:hover {
+    @apply outline;
+  }
+
+  &:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+
+  &:focus {
+    @apply outline-2 outline-offset-2;
+  }
+}
+
+label {
+  @apply cursor-pointer;
+}

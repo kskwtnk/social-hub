@@ -40,10 +40,16 @@ function App() {
   }
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <PostForm />
-      <div style={{ marginTop: "2rem" }}>
-        <button onClick={handleShowSettings} type="button">
+    <div className="grid grow grid-rows-[1fr_auto]">
+      <div className="p-8">
+        <PostForm />
+      </div>
+      <div className="border-stone-300 border-t px-8 py-4">
+        <button
+          className="rounded text-sm text-stone-600 underline hover:outline-offset-2!"
+          onClick={handleShowSettings}
+          type="button"
+        >
           Edit Credentials
         </button>
       </div>
