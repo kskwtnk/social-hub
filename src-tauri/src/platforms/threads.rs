@@ -89,10 +89,7 @@ pub async fn post(message: &str, user_id: &str, access_token: &str) -> Result<St
 
     let post_response = client
         .get(&post_url)
-        .query(&[
-            ("fields", "permalink"),
-            ("access_token", access_token),
-        ])
+        .query(&[("fields", "permalink"), ("access_token", access_token)])
         .send()
         .await;
 
@@ -100,7 +97,10 @@ pub async fn post(message: &str, user_id: &str, access_token: &str) -> Result<St
     let thread_url = if let Ok(response) = post_response {
         if let Ok(data) = response.json::<PublishResponse>().await {
             data.permalink.unwrap_or_else(|| {
-                format!("https://www.threads.com/t/{} (Note: Open Threads app to view)", publish.id)
+                format!(
+                    "https://www.threads.com/t/{} (Note: Open Threads app to view)",
+                    publish.id
+                )
             })
         } else {
             format!("Post ID: {} (Note: Open Threads app to view)", publish.id)

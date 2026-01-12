@@ -19,4 +19,4 @@ export interface PlatformCredentials {
 }
 
 // Screen type for app state management
-export type Screen = 'loading' | 'setup' | 'main';
+export type Screen = "loading" | "setup" | "main";

@@ -16,7 +16,13 @@ pub struct PostResult {
 pub async fn post_to_bluesky(message: String) -> Result<PostResult, String> {
     let creds = PlatformCredentials::load().map_err(|e| e.to_string())?;
 
-    match bluesky::post(&message, &creds.bluesky_identifier, &creds.bluesky_app_password).await {
+    match bluesky::post(
+        &message,
+        &creds.bluesky_identifier,
+        &creds.bluesky_app_password,
+    )
+    .await
+    {
         Ok(url) => Ok(PostResult {
             platform: "Bluesky".to_string(),
             success: true,
@@ -66,7 +72,13 @@ pub async fn post_to_x(message: String) -> Result<PostResult, String> {
 pub async fn post_to_threads(message: String) -> Result<PostResult, String> {
     let creds = PlatformCredentials::load().map_err(|e| e.to_string())?;
 
-    match threads::post(&message, &creds.threads_user_id, &creds.threads_access_token).await {
+    match threads::post(
+        &message,
+        &creds.threads_user_id,
+        &creds.threads_access_token,
+    )
+    .await
+    {
         Ok(url) => Ok(PostResult {
             platform: "Threads".to_string(),
             success: true,
@@ -127,7 +139,15 @@ pub async fn post_to_all(message: String) -> Vec<PostResult> {
         creds.x_access_token_secret.clone(),
     );
     let x_handle = tokio::spawn(async move {
-        match x::post(&message_clone, &x_creds.0, &x_creds.1, &x_creds.2, &x_creds.3).await {
+        match x::post(
+            &message_clone,
+            &x_creds.0,
+            &x_creds.1,
+            &x_creds.2,
+            &x_creds.3,
+        )
+        .await
+        {
             Ok(url) => PostResult {
                 platform: "X".to_string(),
                 success: true,
@@ -143,7 +163,10 @@ pub async fn post_to_all(message: String) -> Vec<PostResult> {
         }
     });
 
-    let threads_creds = (creds.threads_user_id.clone(), creds.threads_access_token.clone());
+    let threads_creds = (
+        creds.threads_user_id.clone(),
+        creds.threads_access_token.clone(),
+    );
     let threads_handle = tokio::spawn(async move {
         match threads::post(&message, &threads_creds.0, &threads_creds.1).await {
             Ok(url) => PostResult {

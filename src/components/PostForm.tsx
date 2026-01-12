@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { PostResult } from '../lib/types';
-import { postToBluesky, postToX, postToThreads, postToAll } from '../lib/api';
+import { useState } from "react";
+import { postToAll, postToBluesky, postToThreads, postToX } from "../lib/api";
+import type { PostResult } from "../lib/types";
 
 export default function PostForm() {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [posting, setPosting] = useState(false);
   const [results, setResults] = useState<PostResult[]>([]);
 
-  const handlePost = async (platform: 'bluesky' | 'x' | 'threads' | 'all') => {
+  const handlePost = async (platform: "bluesky" | "x" | "threads" | "all") => {
     if (!message.trim()) {
-      alert('Please enter a message');
+      alert("Please enter a message");
       return;
     }
 
@@ -20,16 +20,16 @@ export default function PostForm() {
       let postResults: PostResult[] = [];
 
       switch (platform) {
-        case 'bluesky':
+        case "bluesky":
           postResults = [await postToBluesky(message)];
           break;
-        case 'x':
+        case "x":
           postResults = [await postToX(message)];
           break;
-        case 'threads':
+        case "threads":
           postResults = [await postToThreads(message)];
           break;
-        case 'all':
+        case "all":
           postResults = await postToAll(message);
           break;
       }
@@ -38,9 +38,9 @@ export default function PostForm() {
     } catch (err) {
       setResults([
         {
-          platform: platform === 'all' ? 'All' : platform,
+          error: err instanceof Error ? err.message : "Unknown error",
+          platform: platform === "all" ? "All" : platform,
           success: false,
-          error: err instanceof Error ? err.message : 'Unknown error',
         },
       ]);
     } finally {
@@ -52,35 +52,51 @@ export default function PostForm() {
     <div>
       <h1>Post to Social Media</h1>
 
-      <div style={{ marginBottom: '1rem' }}>
+      <div style={{ marginBottom: "1rem" }}>
         <label>
           Message:
           <br />
           <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={6}
-            style={{ width: '100%', maxWidth: '600px' }}
-            placeholder="What's on your mind?"
             disabled={posting}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="What's on your mind?"
+            rows={6}
+            style={{ maxWidth: "600px", width: "100%" }}
+            value={message}
           />
         </label>
-        <div style={{ marginTop: '0.5rem', color: '#666' }}>
+        <div style={{ color: "#666", marginTop: "0.5rem" }}>
           {message.length} characters
         </div>
       </div>
 
-      <div style={{ marginBottom: '2rem' }}>
-        <button onClick={() => handlePost('all')} disabled={posting}>
+      <div style={{ marginBottom: "2rem" }}>
+        <button
+          disabled={posting}
+          onClick={() => handlePost("all")}
+          type="button"
+        >
           Post to All Platforms
         </button>
-        <button onClick={() => handlePost('bluesky')} disabled={posting}>
+        <button
+          disabled={posting}
+          onClick={() => handlePost("bluesky")}
+          type="button"
+        >
           Post to Bluesky
         </button>
-        <button onClick={() => handlePost('x')} disabled={posting}>
+        <button
+          disabled={posting}
+          onClick={() => handlePost("x")}
+          type="button"
+        >
           Post to X
         </button>
-        <button onClick={() => handlePost('threads')} disabled={posting}>
+        <button
+          disabled={posting}
+          onClick={() => handlePost("threads")}
+          type="button"
+        >
           Post to Threads
         </button>
       </div>
@@ -92,22 +108,26 @@ export default function PostForm() {
           <h2>Results</h2>
           {results.map((result, index) => (
             <div
-              key={index}
+              key={`${result.platform}-${index}`}
               style={{
-                marginBottom: '1rem',
-                padding: '1rem',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                backgroundColor: result.success ? '#e8f5e9' : '#ffebee',
+                backgroundColor: result.success ? "#e8f5e9" : "#ffebee",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                marginBottom: "1rem",
+                padding: "1rem",
               }}
             >
               <h3>{result.platform}</h3>
               {result.success ? (
                 <div>
-                  <div style={{ color: 'green' }}>✓ Success</div>
+                  <div style={{ color: "green" }}>✓ Success</div>
                   {result.url && (
                     <div>
-                      <a href={result.url} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={result.url}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
                         View Post
                       </a>
                     </div>
@@ -115,7 +135,7 @@ export default function PostForm() {
                 </div>
               ) : (
                 <div>
-                  <div style={{ color: 'red' }}>✗ Failed</div>
+                  <div style={{ color: "red" }}>✗ Failed</div>
                   {result.error && <div>Error: {result.error}</div>}
                 </div>
               )}
