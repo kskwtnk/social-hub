@@ -1,15 +1,64 @@
 import { useState } from "react";
-import { postToAll, postToBluesky, postToThreads, postToX } from "../lib/api";
+import { postToBluesky, postToThreads, postToX } from "../lib/api";
 import type { PostResult } from "../lib/types";
+
+type PlatformKey = "bluesky" | "x" | "threads";
+type SelectedPlatforms = Record<PlatformKey, boolean>;
 
 export default function PostForm() {
   const [message, setMessage] = useState("");
   const [posting, setPosting] = useState(false);
   const [results, setResults] = useState<PostResult[]>([]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<SelectedPlatforms>(
+    {
+      bluesky: true,
+      threads: true,
+      x: true,
+    },
+  );
 
-  const handlePost = async (platform: "bluesky" | "x" | "threads" | "all") => {
+  // Select All の状態を計算
+  const allSelected =
+    selectedPlatforms.bluesky &&
+    selectedPlatforms.threads &&
+    selectedPlatforms.x;
+
+  const someSelected =
+    selectedPlatforms.bluesky ||
+    selectedPlatforms.threads ||
+    selectedPlatforms.x;
+
+  // Select All ハンドラー
+  const handleSelectAll = () => {
+    const newValue = !allSelected;
+    setSelectedPlatforms({
+      bluesky: newValue,
+      threads: newValue,
+      x: newValue,
+    });
+  };
+
+  // 個別チェックボックスハンドラー
+  const handlePlatformToggle = (platform: PlatformKey) => {
+    setSelectedPlatforms((prev) => ({
+      ...prev,
+      [platform]: !prev[platform],
+    }));
+  };
+
+  const handlePost = async () => {
     if (!message.trim()) {
       alert("Please enter a message");
+      return;
+    }
+
+    // 選択されたプラットフォームを抽出
+    const selectedKeys = (
+      Object.keys(selectedPlatforms) as PlatformKey[]
+    ).filter((key) => selectedPlatforms[key]);
+
+    if (selectedKeys.length === 0) {
+      alert("Please select at least one platform");
       return;
     }
 
@@ -17,29 +66,28 @@ export default function PostForm() {
     setResults([]);
 
     try {
-      let postResults: PostResult[] = [];
+      // プラットフォームごとのAPI関数マッピング
+      const platformApis: Record<
+        PlatformKey,
+        (msg: string) => Promise<PostResult>
+      > = {
+        bluesky: postToBluesky,
+        threads: postToThreads,
+        x: postToX,
+      };
 
-      switch (platform) {
-        case "bluesky":
-          postResults = [await postToBluesky(message)];
-          break;
-        case "x":
-          postResults = [await postToX(message)];
-          break;
-        case "threads":
-          postResults = [await postToThreads(message)];
-          break;
-        case "all":
-          postResults = await postToAll(message);
-          break;
-      }
+      // 選択されたプラットフォームに並行投稿
+      const postPromises = selectedKeys.map((platform) =>
+        platformApis[platform](message),
+      );
 
+      const postResults = await Promise.all(postPromises);
       setResults(postResults);
     } catch (err) {
       setResults([
         {
           error: err instanceof Error ? err.message : "Unknown error",
-          platform: platform === "all" ? "All" : platform,
+          platform: "Multiple",
           success: false,
         },
       ]);
@@ -71,33 +119,132 @@ export default function PostForm() {
       </div>
 
       <div style={{ marginBottom: "2rem" }}>
+        {/* Platform Selection */}
+        <div
+          style={{
+            margin: "0 auto 1rem auto",
+            maxWidth: "600px",
+            textAlign: "left",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: "600",
+              marginBottom: "0.5rem",
+            }}
+          >
+            Select Platforms:
+          </div>
+
+          {/* Select All Checkbox */}
+          <div style={{ marginBottom: "0.5rem" }}>
+            <label
+              style={{
+                alignItems: "center",
+                cursor: posting ? "not-allowed" : "pointer",
+                display: "flex",
+                opacity: posting ? 0.5 : 1,
+              }}
+            >
+              <input
+                checked={allSelected}
+                disabled={posting}
+                onChange={handleSelectAll}
+                style={{
+                  cursor: posting ? "not-allowed" : "pointer",
+                  marginRight: "0.5rem",
+                }}
+                type="checkbox"
+              />
+              <span style={{ fontWeight: "500" }}>Select All Platforms</span>
+            </label>
+          </div>
+
+          {/* Individual Platform Checkboxes */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.5rem",
+              marginLeft: "1.5rem",
+            }}
+          >
+            <label
+              style={{
+                alignItems: "center",
+                cursor: posting ? "not-allowed" : "pointer",
+                display: "flex",
+                opacity: posting ? 0.5 : 1,
+              }}
+            >
+              <input
+                checked={selectedPlatforms.bluesky}
+                disabled={posting}
+                onChange={() => handlePlatformToggle("bluesky")}
+                style={{
+                  cursor: posting ? "not-allowed" : "pointer",
+                  marginRight: "0.5rem",
+                }}
+                type="checkbox"
+              />
+              <span>Bluesky</span>
+            </label>
+
+            <label
+              style={{
+                alignItems: "center",
+                cursor: posting ? "not-allowed" : "pointer",
+                display: "flex",
+                opacity: posting ? 0.5 : 1,
+              }}
+            >
+              <input
+                checked={selectedPlatforms.threads}
+                disabled={posting}
+                onChange={() => handlePlatformToggle("threads")}
+                style={{
+                  cursor: posting ? "not-allowed" : "pointer",
+                  marginRight: "0.5rem",
+                }}
+                type="checkbox"
+              />
+              <span>Threads</span>
+            </label>
+
+            <label
+              style={{
+                alignItems: "center",
+                cursor: posting ? "not-allowed" : "pointer",
+                display: "flex",
+                opacity: posting ? 0.5 : 1,
+              }}
+            >
+              <input
+                checked={selectedPlatforms.x}
+                disabled={posting}
+                onChange={() => handlePlatformToggle("x")}
+                style={{
+                  cursor: posting ? "not-allowed" : "pointer",
+                  marginRight: "0.5rem",
+                }}
+                type="checkbox"
+              />
+              <span>X (Twitter)</span>
+            </label>
+          </div>
+        </div>
+
+        {/* Post Button */}
         <button
-          disabled={posting}
-          onClick={() => handlePost("all")}
+          disabled={posting || !someSelected}
+          onClick={handlePost}
+          style={{
+            cursor: !someSelected || posting ? "not-allowed" : "pointer",
+            opacity: !someSelected && !posting ? 0.5 : 1,
+          }}
           type="button"
         >
-          Post to All Platforms
-        </button>
-        <button
-          disabled={posting}
-          onClick={() => handlePost("bluesky")}
-          type="button"
-        >
-          Post to Bluesky
-        </button>
-        <button
-          disabled={posting}
-          onClick={() => handlePost("x")}
-          type="button"
-        >
-          Post to X
-        </button>
-        <button
-          disabled={posting}
-          onClick={() => handlePost("threads")}
-          type="button"
-        >
-          Post to Threads
+          Post to Selected Platforms
         </button>
       </div>
 
