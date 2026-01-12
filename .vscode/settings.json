@@ -26,6 +26,9 @@
     "source.organizeImports.biome": "explicit"
   },
   "editor.formatOnSave": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
   "files.watcherExclude": {
     "**/dist/**": true,
     "**/node_modules/**": true,
