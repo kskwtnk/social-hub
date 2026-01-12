@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./App.css";
 import CredentialsForm from "./components/CredentialsForm";
 import PostForm from "./components/PostForm";
 import { checkCredentials } from "./lib/api";
