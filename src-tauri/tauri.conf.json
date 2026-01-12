@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "social-hub",
+  "productName": "Social Hub",
   "version": "0.1.0",
   "identifier": "com.kskwtnk.social-hub",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "social-hub",
+        "title": "Social Hub",
         "width": 600,
         "height": 800
       }
@@ -23,13 +23,15 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["app"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ]
+      "icons/icon.icns"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "10.13"
+    }
   }
 }

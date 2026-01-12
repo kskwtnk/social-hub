@@ -45,3 +45,9 @@ reqwest-oauth1 = "0.3.0"
 # Keychain integration
 keyring = { version = "3.6", features = ["apple-native", "sync-secret-service"] }
 
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+
