@@ -13,8 +13,8 @@ pub async fn post(
     access_token_secret: &str,
 ) -> Result<String> {
     // Create OAuth1 secrets
-    let secrets = Secrets::new(consumer_key, consumer_secret)
-        .token(access_token, access_token_secret);
+    let secrets =
+        Secrets::new(consumer_key, consumer_secret).token(access_token, access_token_secret);
 
     // Create HTTP client
     let client = Client::new();

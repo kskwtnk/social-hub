@@ -61,7 +61,7 @@ pub async fn post(message: &str, identifier: &str, password: &str) -> Result<Str
     let rkey = response
         .uri
         .split('/')
-        .last()
+        .next_back()
         .context("Failed to extract rkey from post URI")?;
 
     // Get handle or DID from session for reliable URL construction
