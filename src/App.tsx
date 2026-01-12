@@ -1,50 +1,59 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
 import "./App.css";
+import CredentialsForm from "./components/CredentialsForm";
+import PostForm from "./components/PostForm";
+import { checkCredentials } from "./lib/api";
+import type { Screen } from "./lib/types";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const [screen, setScreen] = useState<Screen>("loading");
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+  // Check credentials on mount
+  useEffect(() => {
+    checkCredentials().then((hasCredentials) => {
+      setScreen(hasCredentials ? "main" : "setup");
+    });
+  }, []);
+
+  const handleCredentialsSaved = () => {
+    setScreen("main");
+  };
+
+  const handleShowSettings = () => {
+    setScreen("setup");
+  };
+
+  if (screen === "loading") {
+    return (
+      <div style={{ padding: "2rem" }}>
+        <h1>Loading...</h1>
+      </div>
+    );
+  }
+
+  if (screen === "setup") {
+    return (
+      <div style={{ padding: "2rem" }}>
+        <CredentialsForm onSave={handleCredentialsSaved} />
+      </div>
+    );
   }
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="grid grow grid-rows-[1fr_auto]">
+      <div className="p-8">
+        <PostForm />
       </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+      <div className="border-stone-300 border-t px-8 py-4">
+        <button
+          className="rounded text-sm text-stone-600 underline hover:outline-offset-2!"
+          onClick={handleShowSettings}
+          type="button"
+        >
+          Edit Credentials
+        </button>
+      </div>
+    </div>
   );
 }
 

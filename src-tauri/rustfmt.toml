@@ -1,0 +1,16 @@
+# Rustfmt configuration for Tauri backend
+edition = "2021"
+hard_tabs = false
+tab_spaces = 4
+newline_style = "Auto"
+use_small_heuristics = "Default"
+reorder_imports = true
+reorder_modules = true
+remove_nested_parens = true
+
+# Note: The following options require nightly Rust
+# Uncomment these if you're using rustfmt with nightly toolchain:
+# format_code_in_doc_comments = true
+# normalize_comments = true
+# wrap_comments = true
+# comment_width = 80
